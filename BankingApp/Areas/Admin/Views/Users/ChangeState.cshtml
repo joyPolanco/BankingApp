@@ -1,0 +1,42 @@
+﻿@model string
+@{
+    ViewData["Title"] = "ChangeState";
+    bool isDeactivateMode = ViewBag.IsDeactivateMode ?? false;
+    Layout = "_LayoutAnonymous";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="@(isDeactivateMode ? "fas fa-user-slash text-danger" : "fas fa-user-check text-success") fa-3x"></i>
+                    </div>
+                    <h3 class="mb-4">
+                        @(isDeactivateMode ? "Desactivar Usuario" : "Activar Usuario")
+                    </h3>
+                    <p class="text-muted mb-4">
+                        ¿Está seguro que desea @(isDeactivateMode ? "desactivar" : "activar") el usuario</strong>?
+                    </p>
+
+                    <form asp-controller="Users" asp-action="ToogleStatus" method="post">
+                        <input type="hidden" name="UserId" value="@Model" />
+                        <div class="d-flex justify-content-center gap-3">
+                            <a asp-controller="Users" asp-action="Index" class="btn btn-outline-secondary px-4">
+                                <i class="fas fa-arrow-left me-2"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn @(isDeactivateMode ? "btn-danger" : "btn-success") px-4">
+                                <i class="@(isDeactivateMode ? "fas fa-user-slash" : "fas fa-user-check") me-2"></i>
+                                @(isDeactivateMode ? "Desactivar" : "Activar")
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+}

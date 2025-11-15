@@ -1,0 +1,50 @@
+﻿@using BankingApp.Core.Application.ViewModels.Loan
+@model TermPageViewModel
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Configurar préstamo";
+}
+
+<div class="container py-4">
+    <div class="card mx-auto shadow-sm p-4" style="max-width:700px;">
+        <h4 class="mb-3">Configurar préstamo para el cliente</h4>
+
+        <form asp-action="SetLoan" method="post">
+            <input asp-for="ClientId" type="hidden" />
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="TermInMonths" class="form-label">Plazo</label>
+                    <select asp-for="TermInMonths" class="form-select" required>
+                        @for (int i = 6; i <= 60; i += 6)
+                        {
+                            <option value="@i">@i meses</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Amount" class="form-label">Monto a prestar</label>
+                    <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0.01" required />
+                    <span asp-validation-for="Amount" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="AnnualInterestRate" class="form-label">Tasa anual (%)</label>
+                    <input asp-for="AnnualInterestRate" class="form-control" type="number" step="0.01" min="0" required />
+                    <span asp-validation-for="AnnualInterestRate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="d-flex justify-between mt-4">
+                <a asp-action="Clients" class="btn btn-secondary">Volver al listado de clientes</a>
+                <button type="submit" class="btn btn-primary">Confirmar préstamo</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

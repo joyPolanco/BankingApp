@@ -23,15 +23,19 @@ namespace BankingApp.Core.Application.Mappings.EntitiesAndDtos
                 .ForMember(s => s.Id, opt => opt.Ignore())
                 .ForMember(s => s.IdBeneficiary, opt => opt.Ignore())
                 .ReverseMap();
-               
 
 
-        
-        
-        
-        
-        
-        
+
+
+            CreateMap<UserDto, BeneficiaryToTransactionDto>()
+                .ForMember(s => s.Gmail, opt => opt.MapFrom(src => src.Email))
+                .ForMember(s => s.Id, opt => opt.Ignore())
+                .ForMember(s => s.Cuenta, opt => opt.Ignore())
+                .ReverseMap();
+
+
+
+
         }
 
 

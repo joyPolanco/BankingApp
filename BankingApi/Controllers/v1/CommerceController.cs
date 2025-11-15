@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BankingApp.Core.Application.Dtos.Commerce;
+using BankingApp.Core.Application.Dtos.Common;
 using BankingApp.Core.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,22 +11,28 @@ namespace BankingApi.Controllers.v1
 {
     [Authorize(AuthenticationSchemes = "Bearer", Roles = "ADMIN")]
     [Route("api/v{version::apiVersion}/commerce")]
-    
-    public class CommerceController : Controller
+
+    public class CommerceController : BaseApiController
     {
         private readonly ICommerceService _commerceService;
         private readonly IMapper _mapper ;
-        public CommerceController(ICommerceService commerceService, IMapper mapper)
+        private readonly IAccountServiceForWebApi _accountServiceForWeb;
+
+        public CommerceController(ICommerceService commerceService, IMapper mapper, IAccountServiceForWebApi accountServiceForWeb)
         {
             _commerceService = commerceService;
             _mapper = mapper;
+            _accountServiceForWeb = accountServiceForWeb;
         }
         [HttpGet(Name = "ObtenerTodosLoscomercios")]
-        public async Task<IActionResult> GetAll([FromQuery] int ?page, [FromQuery] int ?pageSize)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+        public async Task<IActionResult> GetAll([FromQuery] int page=1, [FromQuery] int pageSize=20)
         {
             try
             {
-                var result = await _commerceService.GetAllFiltered(page, pageSize);
+                var result = await _commerceService.GetAllActiveFiltered(page, pageSize);
                 return Ok(JsonConvert.SerializeObject(result));
 
             }
@@ -38,9 +45,13 @@ namespace BankingApi.Controllers.v1
 
 
         }
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
 
-        [HttpGet("/{id}")]
-        public async Task<IActionResult> GetAll([FromRoute] int id)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
             try
             {
@@ -57,12 +68,15 @@ namespace BankingApi.Controllers.v1
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Register([FromBody] CreateCommerceDto dto)
         {
 
-            if (string.IsNullOrEmpty(dto.Name)) return BadRequest("El nombre es requerido");
-            if (string.IsNullOrEmpty(dto.Description)) return BadRequest("La descripcion es requerida");
-            if (string.IsNullOrEmpty(dto.Logo)) return BadRequest("El logo es requerido");
+            if (string.IsNullOrEmpty(dto.Name) || dto.Name=="string") return BadRequest("El nombre es requerido");
+            if (string.IsNullOrEmpty(dto.Description) || dto.Description== "string") return BadRequest("La descripcion es requerida");
+            if (string.IsNullOrEmpty(dto.Logo) || dto.Logo == "string") return BadRequest("El logo es requerido");
 
 
             try
@@ -71,7 +85,8 @@ namespace BankingApi.Controllers.v1
             
                 var result = await _commerceService.AddAsync(_mapper.Map<CommerceDto> (dto));
 
-                return Created();
+                return CreatedAtAction(nameof(Register), result);
+             
 
             }
             catch
@@ -82,8 +97,12 @@ namespace BankingApi.Controllers.v1
         }
 
 
-        [HttpPut]
-        public async Task<IActionResult> Update([FromBody] EditCommerceDto dto)
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Update([FromRoute]int id, [FromBody] EditCommerceDto dto)
         {
 
             if (string.IsNullOrEmpty(dto.Name)) return BadRequest("El nombre es requerido");
@@ -94,7 +113,7 @@ namespace BankingApi.Controllers.v1
             try
             {
 
-                var commerce = await _commerceService.GetByIdAsync(dto.Id);
+                var commerce = await _commerceService.GetByIdAsync(id);
                 if (commerce == null)
                     return NotFound("Comercio no encontrado");
 
@@ -107,7 +126,7 @@ namespace BankingApi.Controllers.v1
                 if (!string.IsNullOrWhiteSpace(dto.Name))
                     commerce.Name = dto.Name;
 
-                var result = await _commerceService.UpdateAsync(dto.Id, _mapper.Map<CommerceDto>(commerce));
+                var result = await _commerceService.UpdateAsync(id, _mapper.Map<CommerceDto>(commerce));
                 return NoContent();
 
             }
@@ -120,15 +139,9 @@ namespace BankingApi.Controllers.v1
 
 
 
-            //Preguntar es contradictorio
-            /*: desactiva o activa un comercio por su identificador, cuando se 
-            desactiva un comercio todos los usuarios asociado a ese comercio*/
-
-
-
         }
-            [HttpPatch("/{id}")]
-            public async Task<IActionResult> ToogleState([FromRoute] int id, [FromBody] bool status)
+            [HttpPatch("{id}")]
+            public async Task<IActionResult> ToogleState([FromRoute] int id, [FromBody] StatusUpdateDto  updateStatusDto)
             {
 
 
@@ -139,10 +152,22 @@ namespace BankingApi.Controllers.v1
                     if (commerce == null)
                         return NotFound("Comercio no encontrado");
 
-                  commerce.IsActive = status;
+                  commerce.IsActive = updateStatusDto.Status;
+
+                  if (updateStatusDto.Status)
+                {
                     var result = await _commerceService.UpdateAsync(id, _mapper.Map<CommerceDto>(commerce));
-               
-                    return NoContent();
+
+                }
+                else
+                {
+
+
+                  var list = await _commerceService.GetCommerceAssociates(id);
+                    await   _accountServiceForWeb.DeactivateUsersAsync(list);
+                }
+
+                return NoContent();
 
                 }
                 catch

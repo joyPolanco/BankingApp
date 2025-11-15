@@ -1,0 +1,62 @@
+﻿.card-option {
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: #fff;
+}
+
+    .card-option:hover,
+    .card-option.active {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(28, 110, 164, 0.2);
+        background: linear-gradient(135deg, var(--color-azul-medio), var(--color-azul-claro));
+        color: var(--color-texto-claro);
+    }
+
+        .card-option:hover h5,
+        .card-option:hover p {
+            color: var(--color-texto-claro) !important;
+        }
+
+.icon-option {
+    font-size: 2.8rem;
+    color: var(--color-azul-claro);
+    transition: color 0.3s ease;
+}
+
+.card-option:hover .icon-option {
+    color: var(--color-texto-claro);
+}
+
+
+form .form-control {
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+    form .form-control:focus {
+        border-color: var(--color-azul-medio);
+        box-shadow: 0 0 0 0.15rem rgba(28, 110, 164, 0.25);
+    }
+
+form label {
+    color: var(--color-azul-oscuro);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-azul-medio), var(--color-azul-claro));
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.2s ease;
+}
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+    }
+
+.btn-outline-secondary {
+    border-radius: 10px;
+}
+
+

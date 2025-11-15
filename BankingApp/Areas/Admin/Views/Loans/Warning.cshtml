@@ -1,0 +1,39 @@
+﻿@using BankingApp.Core.Application.ViewModels.Loan
+@model TermPageViewModel
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Advertencia de riesgo";
+}
+
+<div class="container py-4">
+    <div class="card mx-auto shadow-sm p-4" style="max-width:700px;">
+        <h4 class="mb-3">Advertencia</h4>
+
+        @if (ViewBag.IsAlreadyHighRisk != null)
+        {
+            <div class="alert alert-warning">@ViewBag.IsAlreadyHighRisk</div>
+        }
+        @if (ViewBag.IsHighRisk != null)
+        {
+            <div class="alert alert-warning">@ViewBag.IsHighRisk</div>
+        }
+
+        <p class="text-muted">¿Desea confirmar la asignación a pesar del riesgo?</p>
+
+        <div class="d-flex gap-2">
+            <form asp-action="ConfirmLoan" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger">
+                    Confirmar y asignar préstamo
+                </button>
+            </form>
+            <form asp-action="CancelWarning" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-secondary">
+                    Cancelar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

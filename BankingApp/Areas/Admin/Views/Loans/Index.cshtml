@@ -1,5 +1,109 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using BankingApp.Core.Application.ViewModels.Loan
+@model LoanPageViewModel
+
 @{
+    Layout = "_LayoutAdmin";
 }
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary">
+            <i class="bi bi-cash-coin me-2"></i> Gestión de Préstamos
+        </h2>
+        <a asp-action="Asign" class="btn btn-primary">
+            <i class="bi bi-plus-circle-fill me-1"></i> Asignar préstamo
+        </a>
+    </div>
+
+    <div class="card mb-3 p-3">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Filtrar por estado</label>
+                <select asp-for="FilterStatus" asp-items="ViewBag.Filters" class="form-select form-select-sm">
+                    <option value="">Todos los estados</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Filtrar por cédula</label>
+                <input asp-for="FilterDocumentId" class="form-control form-control-sm" placeholder="Ej: 00123456789" />
+            </div>
+            <div class="col-md-4 text-md-end">
+                <button type="submit" form="filterForm" class="btn btn-outline-primary">
+                    <i class="bi bi-search me-1"></i> Aplicar filtros
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form id="filterForm" asp-action="Index" method="get">
+        <input type="hidden" name="page" value="1" />
+    </form>
+
+    <div class="table-responsive mb-4">
+        <table class="table table-hover align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Monto Capital</th>
+                    <th>Total Cuotas</th>
+                    <th>Cuotas pagadas</th>
+                    <th>Saldo pendiente</th>
+                    <th>Tasa (%)</th>
+                    <th>Plazo (meses)</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var item in Model.Loans)
+                {
+                    <tr>
+                        <td>@item.PublicId</td>
+                        <td>@item.ClientName</td>
+                        <td>@item.TotalLoanAmount.ToString("C")</td>
+                        <td>@item.LoanTermInMonths</td>
+                        <td>@item.PaidInstallmentsCount</td>
+                        <td>@item.OutstandingBalance.ToString("C")</td>
+                        <td>@item.InterestRate</td>
+                        <td>@item.LoanTermInMonths</td>
+                        <td>
+                            <span class="badge @(item.Isdelinquent ? "bg-danger" : "bg-success")">
+                                @(item.Isdelinquent ? "En mora" : "Al día")
+                            </span>
+                        </td>
+                        <td class="d-flex gap-2">
+                            <a asp-action="Details" asp-route-publicId="@item.PublicId" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a asp-action="Edit" asp-route-publicId="@item.PublicId" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <nav aria-label="Navegación de páginas">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)"  asp-route-status="@Model.FilterStatus" asp-route-documentId="@Model.FilterDocumentId">
+                    <i class="bi bi-chevron-left"></i> Anterior
+                </a>
+            </li>
+            @for (int i = 1; i <= Model.MaxPages; i++)
+            {
+                <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@i"  asp-route-status="@Model.FilterStatus" asp-route-documentId="@Model.FilterDocumentId">@i</a>
+                </li>
+            }
+            <li class="page-item @(Model.CurrentPage == Model.MaxPages ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage + 1)" asp-route-status="@Model.FilterStatus" asp-route-documentId="@Model.FilterDocumentId">
+                    Siguiente <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>

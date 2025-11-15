@@ -89,3 +89,35 @@ footer a {
 .navbar, .custom-footer {
     transition: background 0.3s ease;
 }
+
+
+/* Estilo personalizado para el dropdown del menú */
+.nav-item.dropdown .dropdown-menu {
+    background: linear-gradient(90deg, var(--color-azul-oscuro), var(--color-azul-medio));
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    min-width: 230px;
+    padding: 0.3rem 0;
+}
+
+.nav-item.dropdown .dropdown-item {
+    color: var(--color-texto-claro);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+    .nav-item.dropdown .dropdown-item:hover {
+        background-color: var(--color-azul-claro);
+        color: var(--color-texto-claro);
+        transform: translateX(5px);
+    }
+
+.nav-item.dropdown .dropdown-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.nav-link.dropdown-toggle.show {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+}

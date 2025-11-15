@@ -21,8 +21,4 @@
     <ProjectReference Include="..\BankingApp.Core.Domain\BankingApp.Core.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
-
 </Project>

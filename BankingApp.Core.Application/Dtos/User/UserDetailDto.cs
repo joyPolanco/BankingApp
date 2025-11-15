@@ -1,3 +1,4 @@
+using BankingApp.Core.Application.Dtos.Account;
 using Newtonsoft.Json;
 
 namespace BankingApp.Core.Application.Dtos.User
@@ -29,12 +30,5 @@ namespace BankingApp.Core.Application.Dtos.User
         public PrimaryAccountDto? PrimaryAccount { get; set; }
     }
 
-    public class PrimaryAccountDto
-    {
-        [JsonProperty("numeroCuenta")]
-        public required string AccountNumber { get; set; }
-
-        [JsonProperty("balance")]
-        public decimal Balance { get; set; }
-    }
+ 
 }

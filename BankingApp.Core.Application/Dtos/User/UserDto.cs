@@ -1,4 +1,5 @@
 ﻿
+using BankingApp.Core.Application.Dtos.Account;
 using Newtonsoft.Json;
 
 namespace BankingApp.Core.Application.Dtos.User
@@ -32,5 +33,12 @@ namespace BankingApp.Core.Application.Dtos.User
 
         public required string Status { get; set; }
 
+
+        [JsonIgnore]
+        public decimal? TotalDebt { get; set; }
+
+
+        [JsonProperty("cuentaPrincipal", NullValueHandling = NullValueHandling.Ignore)]
+        public PrimaryAccountDto ?MainAccount { get; set; }
     }
 }

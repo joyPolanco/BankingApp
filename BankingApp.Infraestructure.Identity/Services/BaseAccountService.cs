@@ -50,7 +50,7 @@ namespace InvestmentApp.Infrastructure.Identity.Services
             if (userWithSameEmail != null)
             {
                 response.HasError = true;
-                response.Errors.Add($"this email: {saveDto.Email} is already taken.");
+                response.Errors.Add($"this email: {saveDto.Email} ya esta asociado al usuario.");
                 return response;
             }
 
@@ -71,7 +71,8 @@ namespace InvestmentApp.Infrastructure.Identity.Services
                 // Agregar todos los roles especificados
                 foreach (var role in saveDto.Roles)
                 {
-                    await _userManager.AddToRoleAsync(user, role);
+                    var rol = EnumMapper<AppRoles>.FromString(role);
+                    await _userManager.AddToRoleAsync(user, rol.ToString());
                 }
 
                 if (isApi != null && !isApi.Value)
@@ -250,15 +251,7 @@ namespace InvestmentApp.Infrastructure.Identity.Services
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
-                var rolesList = await _userManager.GetRolesAsync(user);
-                await _userManager.RemoveFromRolesAsync(user, rolesList.ToList());
-
-                // Agregar todos los roles especificados
-                foreach (var role in saveDto.Roles)
-                {
-                    await _userManager.AddToRoleAsync(user, role);
-                }
-
+             
 
                 if (!user.EmailConfirmed && isNotcreated)
                 {
@@ -304,6 +297,8 @@ namespace InvestmentApp.Infrastructure.Identity.Services
             }
         }
 
+
+    
         public virtual async Task<UserResponseDto> ForgotPasswordAsync(ForgotPasswordRequestDto request, bool? isApi = false)
         {
             UserResponseDto response = new() { HasError = false, Errors = [] };
@@ -474,9 +469,9 @@ namespace InvestmentApp.Infrastructure.Identity.Services
             {
                 return null;
             }
-
             var rolesList = await _userManager.GetRolesAsync(user);
             var role = EnumMapper<AppRoles>.FromString(rolesList.First());
+           
 
             var userDto = new UserDto()
             {

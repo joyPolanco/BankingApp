@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BankingApp.Infraestructure.Identity.Seeds
 {
-    public class DefaultAdminUser
+    public static class DefaultAdminUser
     {
         public static async Task SeedAsync(UserManager<AppUser> userManager)
         {
@@ -29,7 +29,32 @@ namespace BankingApp.Infraestructure.Identity.Seeds
 
 
 
-            //agregando un usuario de tipo cliente
+
+
+            await userManager.CreateAsync(new AppUser
+            {
+                DocumentIdNumber = "",
+                LastName = "",
+                Name = "",
+                UserName = "UltraAdmin",
+                Email = "no.repply.bankingapp@gmail.com",
+                EmailConfirmed = true,
+                IsActive = true
+
+            });
+
+            var user2 = await userManager.FindByNameAsync("UltraAdmin");
+            await userManager.AddPasswordAsync(user2!, "Pa$Word1");
+
+            await userManager.AddToRoleAsync(user2!, AppRoles.ADMIN.ToString());
+
+
+
+
+
+
+
+
             await userManager.CreateAsync(new AppUser
             {
                 DocumentIdNumber = "",
@@ -48,7 +73,6 @@ namespace BankingApp.Infraestructure.Identity.Seeds
 
 
          
-            //Agregando un usuario de tipo Teller 
             await userManager.CreateAsync(new AppUser
             {
                 DocumentIdNumber = "",

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BankingApp.Core.Application.Dtos.Commerce;
+using BankingApp.Core.Application.Dtos.Operations;
 using BankingApp.Core.Application.Interfaces;
 using BankingApp.Core.Domain.Entities;
 using BankingApp.Core.Domain.Interfaces;
@@ -12,40 +13,63 @@ namespace BankingApp.Core.Application.Services
     {
         private readonly ICommerceRepository _repo;
         private readonly IMapper _mapper;
+        private readonly ICommerceUserRepository _commerceUserRepository;
 
-        public CommerceService(ICommerceRepository repo, IMapper mapper) : base(repo, mapper)
+        public CommerceService(ICommerceRepository repo, IMapper mapper, ICommerceUserRepository commerceUserRepository, IUnitOfWork unitOfWork) : base(repo, mapper)
         {
             _repo = repo;
             _mapper = mapper;
+            _commerceUserRepository = commerceUserRepository;
+
         }
 
-
-        public async Task SetUser (int CommerceId, string UserId)
+        public async Task<bool>  CommerceAlreadyHasUser(int CommerceId)
         {
-            var entity=  await _repo.GetByIdAsync(CommerceId);
+           return await _commerceUserRepository.GetAllQuery().AnyAsync(r => r.CommerceId == CommerceId);
+        }
+        public async Task <OperationResultDto>SetUser (int CommerceId, string UserId)
+        {
+            var response = new OperationResultDto() { IsSuccessful = true };
 
-            if (entity != null)
+            var existing = await _commerceUserRepository.GetAllQuery().Where(r => r.UserId == UserId && r.CommerceId == CommerceId).ToListAsync();
+
+            if (existing != null && existing.Count()>=1)
             {
-                entity.UserId= UserId;
-                await _repo.UpdateAsync(entity.Id,entity);
+                response.IsSuccessful = false;
+
+                return response;
+
+   
+
             }
-            
+            try
+            {
+                await _commerceUserRepository.AddAsync(new CommerceUser { CommerceId = CommerceId, UserId = UserId, Id = 0 });
+                return response;
+            }
+            catch
+            {
+                response.IsInternalError=true;
+                return response;
+
+            }
         }
 
-        public async Task<CommercePaginationDto> GetAllFiltered(int? page, int ?pageSize)
+
+ 
+
+        public async Task<CommercePaginationDto> GetAllActiveFiltered(int page = 1, int pageSize = 20)
         {
             var query = _repo.GetAllQuery()
-                 .OrderByDescending(r => r.CreatedAt)
-
-                .Where(r => r.IsActive);
-
+                             .Where(r => r.IsActive)
+                             .OrderByDescending(r => r.CreatedAt);
 
             var totalCount = await query.CountAsync();
 
-            if (page.HasValue && pageSize.HasValue && page > 0 && pageSize > 0)
+            if (page > 0 && pageSize > 0)
             {
-                int skip = (page.Value - 1) * pageSize.Value;
-                query = query.Skip(skip).Take(pageSize.Value);
+                int skip = (page - 1) * pageSize;
+                query = (IOrderedQueryable<Commerce>)query.Skip(skip).Take(pageSize);
             }
 
             var data = await query.ToListAsync();
@@ -54,15 +78,18 @@ namespace BankingApp.Core.Application.Services
             {
                 Data = _mapper.Map<List<CommerceDto>>(data),
                 TotalCount = totalCount,
-                CurrentPage = page??1,
-                PagesCount = pageSize.HasValue && pageSize > 0
-                    ? (int)Math.Ceiling((double)totalCount / pageSize.Value)
-                    : 1
+                CurrentPage = totalCount == 0 ? 0 : page,
+                PagesCount = totalCount == 0 ? 0 : (int)Math.Ceiling((double)totalCount / pageSize)
             };
 
             return result;
+        }
 
 
+
+        public async Task<List<string>> GetCommerceAssociates(int commerceId)
+        {
+           return await _commerceUserRepository.GetAllQuery().Where(r => r.CommerceId == commerceId).Select(r => r.UserId).ToListAsync();
         }
     }
 }

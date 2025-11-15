@@ -5,6 +5,7 @@ namespace BankingApp.Core.Application.Dtos.Commerce
     public class EditCommerceDto
 
     {
+        [JsonIgnore]
         public  required int Id { get; set; }
         [JsonProperty("Nombre")]
 

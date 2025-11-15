@@ -17,7 +17,7 @@ namespace BankingApp.Core.Application.Services
 
 
 
-        public async Task<EntityDto?> AddAsync(EntityDto entityDto)
+        public virtual async Task<EntityDto?> AddAsync(EntityDto entityDto)
         {
             try
             {

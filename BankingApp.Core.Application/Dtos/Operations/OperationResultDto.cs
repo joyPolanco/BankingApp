@@ -10,5 +10,6 @@ namespace BankingApp.Core.Application.Dtos.Operations
     {
         public bool IsSuccessful { get; set; }
         public string StatusMessage { get; set; }
+        public bool IsInternalError { get; set; }
     }
 }

@@ -10,10 +10,10 @@ namespace BankingApi.Controllers.v1
 
     public class LoansController : BaseApiController
     {
-        private readonly ILoanService _loanService;
+        private readonly ILoanServiceForWebApi _loanService;
         private readonly IUserService _userService;
         
-        public LoansController(ILoanService loanService, IUserService userService)
+        public LoansController(ILoanServiceForWebApi loanService, IUserService userService)
         {
             _loanService = loanService;
             _userService = userService;
@@ -30,13 +30,13 @@ namespace BankingApi.Controllers.v1
                 if (user == null) return BadRequest("No existe ningun usuario asociado a esa cedula");
                 clientId = user.DocumentIdNumber;
             }
-            var all= _loanService.GetAllFiltered(page, pageSize, state,clientId);
+            var all=await  _loanService.GetAllFiltered(page, pageSize, state,clientId);
 
             return Ok(all);
         }
 
-        [HttpPost(Name = "CreateLoan")]
-        public async Task<IActionResult> SetLoan(LoanApiRequest request)
+        [HttpPost(Name = "SetLoan")]
+        public async Task<IActionResult> SetLoan(LoanRequest request)
         {
             if (!ModelState.IsValid)
             {

@@ -37,5 +37,7 @@ namespace BankingApp.Core.Application.Dtos.User
         [JsonProperty("montoInicial")]
 
         public decimal? InitialAmount { get; set; } // Monto inicial para clientes
+        [JsonIgnore]
+        public List<string> ?Roles { get; set; }
     }
 }

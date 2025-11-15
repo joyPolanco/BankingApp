@@ -14,7 +14,7 @@ namespace BankingApp.Infraestructure.Persistence.EntitiesConfigurations
         public void Configure(EntityTypeBuilder<Account> builder)
         {
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.ClientId).IsRequired();
+            builder.Property(x => x.UserId).IsRequired();
             builder.Property(x => x.Balance).IsRequired().HasPrecision(18,2);
             builder.Property(x => x.Type).IsRequired();
             builder.Property(x => x.Number).IsRequired();

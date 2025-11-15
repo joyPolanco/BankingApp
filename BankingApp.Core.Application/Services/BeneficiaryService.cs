@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BankingApp.Core.Application.Dtos.Beneficiary;
 using BankingApp.Core.Application.Interfaces;
+using BankingApp.Core.Domain.Common.Enums;
 using BankingApp.Core.Domain.Entities;
 using BankingApp.Core.Domain.Interfaces;
 using System;
@@ -18,10 +19,10 @@ namespace BankingApp.Core.Application.Services
         private readonly IBeneficiaryRepository repo;
         private readonly IAccountRepository accountRepository;
         private readonly IAccountServiceForWebAPP serviceForWebApi;
-        private IBankAccountService serviceBank;
+        private ISavingsAccountServiceForWebApp serviceBank;
 
 
-        public BeneficiaryService(IMapper mapper, IBeneficiaryRepository repo, IAccountRepository accountRepository, IAccountServiceForWebAPP serviceForWebApi, IBankAccountService serviceBank) : base(repo,mapper)
+        public BeneficiaryService(IMapper mapper, IBeneficiaryRepository repo, IAccountRepository accountRepository, IAccountServiceForWebAPP serviceForWebApi, ISavingsAccountServiceForWebApp serviceBank) : base(repo,mapper)
         {
 
             this.repo = repo;
@@ -90,7 +91,7 @@ namespace BankingApp.Core.Application.Services
                     return response;
                 }
 
-                var account = entities.FirstOrDefault(s => s.Number == number);
+                var account = entities.FirstOrDefault(s => s.Number == number && s.Status == AccountStatus.ACTIVE);
 
                 if (account == null)
                 {
@@ -98,10 +99,10 @@ namespace BankingApp.Core.Application.Services
                     return response;
                 }
 
-                response.IdBeneficiary = account.ClientId;
+                response.IdBeneficiary = account.UserId;
 
                
-                var user = await serviceForWebApi.GetUserById(account.ClientId);
+                var user = await serviceForWebApi.GetUserById(account.UserId);
                 if (user != null)
                 {
                     response.NameBeneficiary = $"{user.Name} {user.LastName}";
@@ -162,9 +163,6 @@ namespace BankingApp.Core.Application.Services
             }
 
         }
-
-
-
 
 
 

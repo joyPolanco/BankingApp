@@ -5,6 +5,7 @@ using BankingApp.Core.Domain.Settings;
 using BankingApp.Infraestructure.Identity.Entities;
 using InvestmentApp.Infrastructure.Identity.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -79,6 +80,23 @@ namespace BankingApp.Infraestructure.Identity.Services
 
             return responseDto;
         }
+
+        public async Task DeactivateUsersAsync(List<string> userIds)
+        {
+            var usuarios = await _userManager.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            foreach (var usuario in usuarios)
+            {
+                usuario.IsActive = false;
+
+                await _userManager.UpdateAsync(usuario);
+            }
+        }
+
+
+
 
         #region private methods
         private async Task<JwtSecurityToken> GenerateJWToken(AppUser user)

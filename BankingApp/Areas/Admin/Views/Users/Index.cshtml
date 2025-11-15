@@ -1,0 +1,269 @@
+﻿@using BankingApp.Core.Application.ViewModels.User
+@model UsersPageViewModel
+@{
+    Layout = "_LayoutAdmin";
+    string currentUser = User?.Identity?.Name ?? "";
+}
+
+<div class="container-fluid py-4">
+    <!-- Encabezado -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div class="mb-3 mb-md-0">
+            <h2 class="fw-bold text-primary mb-1" style="display: flex; align-items: center; gap: 10px;">
+                <i class="bi bi-people-fill" style="color: #0d6efd;"></i>
+                Gestión de Usuarios
+            </h2>
+            <p class="text-muted mb-0">Administra los usuarios del sistema bancario</p>
+        </div>
+        <div class="d-flex flex-column flex-sm-row gap-2">
+            <div class="me-sm-2">
+                <select id="roleFilter" class="form-select form-select-sm shadow-sm" asp-items="ViewBag.Filters">
+                    <option value="">Todos los roles</option>
+                </select>
+            </div>
+            <a asp-controller="Users" asp-action="Register" class="btn btn-primary shadow-sm" style="display: inline-flex; align-items: center;">
+                <i class="bi bi-person-plus-fill me-2"></i> Crear Usuario
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4" style="overflow-y: auto;">
+        @if (Model.Users.Any())
+        {
+            @foreach (var item in Model.Users)
+            {
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-3 mb-3 user-card">
+                        <div class="row g-0 align-items-center">
+                            <div class="col">
+                                <div class="card-body py-3">
+                                    <div class="d-flex justify-content-between align-items-start flex-wrap">
+                                        <div class="flex-grow-1 me-3">
+                                            <h5 class="fw-bold mb-1" style="display: flex; align-items: center; gap: 8px;">
+                                                <i class="bi bi-person-fill" style="color: #0d6efd;"></i>
+                                                @item.Name @item.LastName
+                                            </h5>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary mb-2">@item.Role</span>
+                                            <div class="small text-muted">
+                                                <div class="user-info-item mb-1">
+                                                    <i class="bi bi-person-badge me-2"></i>
+                                                    <strong>Cédula:</strong> @item.DocumentIdNumber
+                                                </div>
+                                                <div class="user-info-item mb-1">
+                                                    <i class="bi bi-envelope-fill me-2"></i>
+                                                    <strong>Correo:</strong> @item.Email
+                                                </div>
+                                                <div class="user-info-item">
+                                                    <i class="bi @(item.IsActive ? "bi-check-circle-fill text-success" : "bi-x-circle-fill text-danger") me-2"></i>
+                                                    <strong>Estado:</strong>
+                                                    <span class="@(item.IsActive ? "text-success" : "text-danger")">
+                                                        @(item.IsActive ? "Activo" : "Inactivo")
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3 mt-md-0 d-flex flex-column flex-sm-row gap-2">
+                                            <a asp-controller="Users" asp-action="Edit" asp-route-userId="@item.Id"
+                                               class="btn btn-outline-primary btn-sm px-3 @(item.UserName == currentUser ? "disabled" : "")"
+                                               style="display: inline-flex; align-items: center;">
+                                                <i class="bi bi-pencil-square me-1"></i> Editar
+                                            </a>
+                                            <a asp-controller="Users"
+                                               asp-action="@(item.IsActive ? "Deactivate" : "Activate")"
+                                               asp-route-id="@item.Id"
+                                               class="btn @(item.IsActive ? "btn-outline-danger" : "btn-outline-success") btn-sm px-3 @(item.UserName == currentUser ? "disabled" : "")"
+                                               style="display: inline-flex; align-items: center;">
+                                                <i class="bi @(item.IsActive ? "bi-person-dash-fill" : "bi-person-check-fill") me-1"></i>
+                                                @(item.IsActive ? "Desactivar" : "Activar")
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-people text-muted mb-3" style="font-size: 3rem;"></i>
+                        <h4 class="text-muted">No hay usuarios registrados</h4>
+                        <p class="text-muted mb-4">Comienza creando el primer usuario del sistema</p>
+                        <a asp-controller="Users" asp-action="Create" class="btn btn-primary" style="display: inline-flex; align-items: center;">
+                            <i class="bi bi-person-plus-fill me-2"></i> Crear Usuario
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Paginación -->
+    <div class="mt-4 pt-3 border-top">
+        <nav aria-label="Navegación de páginas">
+            <ul class="pagination justify-content-center">
+                <!-- Botón Anterior -->
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                    @if (Model.CurrentPage == 1)
+                    {
+                        <span class="page-link" style="display: flex; align-items: center;">
+                            <i class="bi bi-chevron-left me-1"></i> Anterior
+                        </span>
+                    }
+                    else
+                    {
+                        <a asp-controller="Users"
+                           asp-action="Index"
+                           asp-route-page="@(Model.CurrentPage - 1)"
+                           asp-route-filter="@Model.Role"
+                           class="page-link"
+                           style="display: flex; align-items: center;">
+                            <i class="bi bi-chevron-left me-1"></i> Anterior
+                        </a>
+                    }
+                </li>
+
+                <!-- Números de página -->
+                @for (int i = 1; i <= Model.MaxPages; i++)
+                {
+                    <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                        @if (Model.CurrentPage == i)
+                        {
+                            <span class="page-link">@i</span>
+                        }
+                        else
+                        {
+                            <a asp-controller="Users"
+                               asp-action="Index"
+                               asp-route-page="@i"
+                               asp-route-filter="@Model.Role"
+                               class="page-link">@i</a>
+                        }
+                    </li>
+                }
+
+                <!-- Botón Siguiente -->
+                <li class="page-item @(Model.CurrentPage == Model.MaxPages ? "disabled" : "")">
+                    @if (Model.CurrentPage == Model.MaxPages)
+                    {
+                        <span class="page-link" style="display: flex; align-items: center;">
+                            Siguiente <i class="bi bi-chevron-right ms-1"></i>
+                        </span>
+                    }
+                    else
+                    {
+                        <a asp-controller="Users"
+                           asp-action="Index"
+                           asp-route-page="@(Model.CurrentPage + 1)"
+                           asp-route-filter="@Model.Role"
+                           class="page-link"
+                           style="display: flex; align-items: center;">
+                            Siguiente <i class="bi bi-chevron-right ms-1"></i>
+                        </a>
+                    }
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<style>
+    .user-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-left: 4px solid #0d6efd !important;
+    }
+
+        .user-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+        }
+
+    .user-info-item {
+        display: flex;
+        align-items: center;
+    }
+
+    .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: #fff;
+    }
+
+    .page-link {
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .page-link:hover {
+            color: #0a58ca;
+        }
+
+    .page-item.disabled .page-link {
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .badge {
+        font-size: 0.75em;
+        padding: 0.35em 0.65em;
+    }
+
+    .btn.disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .row.g-4::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .row.g-4::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .row.g-4::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 10px;
+    }
+
+        .row.g-4::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const roleFilter = document.getElementById('roleFilter');
+            if (roleFilter) {
+                roleFilter.addEventListener('change', function () {
+                    const selectedFilter = this.value;
+                    const baseUrl = '@Url.Action("Index", "Users")';
+                    const url = selectedFilter ?
+                        `${baseUrl}?filter=${encodeURIComponent(selectedFilter)}` :
+                        baseUrl;
+                    window.location.href = url;
+                });
+            }
+
+            // Ajustar altura del contenedor con scroll
+            const cardsContainer = document.querySelector('.row.g-4');
+            const headerHeight = document.querySelector('.container-fluid > .d-flex').offsetHeight;
+            const paginationHeight = document.querySelector('.mt-4.pt-3.border-top').offsetHeight;
+            if (cardsContainer) {
+                cardsContainer.style.maxHeight = `calc(100vh - ${headerHeight + paginationHeight + 40}px)`;
+            }
+        });
+    </script>
+}

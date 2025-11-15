@@ -109,7 +109,7 @@ namespace BankingApp.Areas.Admin.Controllers
 
                 var viewModel = _mapper.Map<SavingsAccountViewModel>(accountDto);
                 
-                var user = await _userService.GetUserById(accountDto.ClientId);
+                var user = await _userService.GetUserById(accountDto.UserId);
                 if (user != null)
                 {
                     viewModel.ClientName = $"{user.Name} {user.LastName}";
@@ -292,7 +292,7 @@ namespace BankingApp.Areas.Admin.Controllers
 
                 var viewModel = _mapper.Map<SavingsAccountViewModel>(accountDto);
                 
-                var user = await _userService.GetUserById(accountDto.ClientId);
+                var user = await _userService.GetUserById(accountDto.UserId);
                 if (user != null)
                 {
                     viewModel.ClientName = $"{user.Name} {user.LastName}";

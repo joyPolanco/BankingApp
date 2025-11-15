@@ -3,11 +3,15 @@ using BankingApp.Core.Application.LayerConfigurations;
 using BankingApp.Infraestructure.Identity.LayerConfigurations;
 using BankingApp.Infraestructure.Persistence.LayerConfigurations;
 using BankingApp.Infraestructure.Shared.LayerConfigurations;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+var cultureInfo = new CultureInfo("en-US");
+cultureInfo.NumberFormat.NumberDecimalSeparator = "."; 
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 builder.Services.AddControllers()
                 .AddNewtonsoftJson();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -23,6 +27,7 @@ builder.Services.AddSwaggerExtension();
 builder.Services.AddApiVersioningExtension();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 var app = builder.Build();
 await app.Services.RunIdentitySeedAsync();

@@ -1,0 +1,94 @@
+﻿@using BankingApp.Core.Application.ViewModels.Loan
+@model ClientsPageViewModel
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Asignar préstamo - Seleccionar cliente";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold text-primary">Seleccionar cliente</h4>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a préstamos
+        </a>
+    </div>
+
+    <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <span><strong>Deuda promedio:</strong> @Model.ClientsDebt.ToString()</span>
+        <small class="text-muted"></small>
+    </div>
+
+    <div class="mb-3 position-relative">
+        <input asp-for="DocumentIdFilter" id="filterInput" class="form-control form-control-lg shadow-sm"
+               placeholder="🔍 Buscar por cédula..." autocomplete="off" />
+    </div>
+
+    <form asp-action="Terms" method="post" id="selectClientForm">
+        <div class="list-group shadow-sm rounded-3 mb-3">
+            @if (Model.Clients?.Any() == true)
+            {
+                foreach (var client in Model.Clients)
+                {
+                    <label class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+                        <div class="form-check">
+                            <input class="form-check-input me-2" type="radio" name="clientId" value="@client.Id" />
+                            <div>
+                                <strong>@client.Name ,@client.LastName</strong><br />
+                                <small class="text-muted">Cédula: @client.DocumentIdNumber | @client.Email</small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block">Deuda total</small>
+                            <strong>@client.TotalDebt DOP</strong>
+                        </div>
+                    </label>
+                }
+            }
+            else
+            {
+                <div class="p-4 text-center text-muted">
+                    <i class="bi bi-people"></i> No hay clientes disponibles para asignar préstamo.
+                </div>
+            }
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver atrás
+            </a>
+            <button type="submit" class="btn btn-primary">
+                Siguiente paso <i class="bi bi-arrow-right-circle ms-1"></i>
+            </button>
+        </div>
+    </form>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger mt-3">@TempData["Error"]</div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        const filterInput = document.getElementById("filterInput");
+        let timeout = null;
+
+        filterInput.addEventListener("input", function () {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                const value = this.value.trim();
+                const query = value ? `?documentIdFilter=${encodeURIComponent(value)}` : "";
+                window.location.href = `/Loan/Clients${query}`;
+            }, 600); 
+        });
+
+        document.getElementById("selectClientForm")?.addEventListener("submit", function (e) {
+            const selected = document.querySelector("input[name='clientId']:checked");
+            if (!selected) {
+                e.preventDefault();
+                alert("Debe seleccionar un cliente antes de continuar.");
+            }
+        });
+    </script>
+}

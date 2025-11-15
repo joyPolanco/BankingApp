@@ -1,0 +1,137 @@
+﻿@using BankingApp.Core.Domain.Common.Enums
+@model BankingApp.Core.Application.ViewModels.User.CreateUserViewModel
+
+@{
+    ViewData["Title"] = "Registrarse";
+    Layout = "_LayoutAnonymous";
+    var ClientRoleName = AppRoles.CLIENT.ToString().ToUpper();
+}
+
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-primary text-white text-center py-3 rounded-top-4">
+                <h5 class="mb-0">Crear Cuenta</h5>
+            </div>
+
+            <div class="card-body p-4">
+                @if (Model?.HasError == true)
+                {
+                    <div id="AlertMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @Model.Error
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form asp-controller="Users" asp-action="RegisterPost" method="post" id="CreateUserForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Name" class="form-label">Nombre</label>
+                            <input asp-for="Name" class="form-control" placeholder="Nombre" required />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="LastName" class="form-label">Apellido</label>
+                            <input asp-for="LastName" class="form-control" placeholder="Apellido" required />
+                            <span asp-validation-for="LastName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DocumentIdNumber" class="form-label">Cédula</label>
+                        <input asp-for="DocumentIdNumber" class="form-control" placeholder="00000000000" required />
+                        <span asp-validation-for="DocumentIdNumber" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Correo Electrónico</label>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="ejemplo@email.com" required />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="UserName" class="form-label">Nombre de Usuario</label>
+                        <input asp-for="UserName" class="form-control" placeholder="nombreusuario" required />
+                        <span asp-validation-for="UserName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Role" class="form-label">Rol</label>
+                        <select asp-for="Role" class="form-select" id="RoleSelect" asp-items="ViewBag.Roles" required>
+                        </select>
+                        <span asp-validation-for="Role" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Password" class="form-label">Contraseña</label>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" required />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ConfirmPassword" class="form-label">Confirmar Contraseña</label>
+                            <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="••••••••" required />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="InitialAmountField" style="display:none;">
+                        <label class="form-label">Monto Inicial</label>
+                        <input type="number" name="InitialAmount" asp-for="@Model.InitialAmount" class="form-control" placeholder="0.00" min="0" step="0.01" />
+                        <span class="text-danger small" id="InitialAmountError"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 mb-3">Crear Cuenta</button>
+                    <a asp-controller="Users" asp-action="Index" class="btn btn-outline-secondary w-100 py-2">
+                        Volver al listado
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const roleSelect = document.getElementById("RoleSelect");
+            const initialAmountField = document.getElementById("InitialAmountField");
+            const initialAmountInput = initialAmountField.querySelector('input');
+            const form = document.getElementById("CreateUserForm");
+            const alertMessage = document.getElementById("AlertMessage");
+            const clientRoleName = "@ClientRoleName";
+
+            function toggleInitialAmount() {
+                const selectedRole = roleSelect.value.toUpperCase();
+
+                if (selectedRole === clientRoleName) {
+                    initialAmountField.style.display = "block";
+                    initialAmountInput.required = true;
+                } else {
+                    initialAmountField.style.display = "none";
+                    initialAmountInput.required = false;
+                    initialAmountInput.value = "";
+                }
+            }
+
+            roleSelect.addEventListener("change", toggleInitialAmount);
+            toggleInitialAmount();
+
+            form.addEventListener("submit", function (e) {
+                if (initialAmountInput.required && initialAmountInput.value === "") {
+                    e.preventDefault();
+                    document.getElementById("InitialAmountError").innerText = "El monto inicial es requerido para clientes.";
+                }
+            });
+
+            if (alertMessage) {
+                setTimeout(() => {
+                    alertMessage.style.display = "none";
+                }, 5000);
+            }
+        });
+    </script>
+}

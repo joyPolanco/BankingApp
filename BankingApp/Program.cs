@@ -2,8 +2,13 @@ using BankingApp.Core.Application.LayerConfigurations;
 using BankingApp.Infraestructure.Identity.LayerConfigurations;
 using BankingApp.Infraestructure.Persistence.LayerConfigurations;
 using BankingApp.Infraestructure.Shared.LayerConfigurations;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
+var cultureInfo = new CultureInfo("en-US");
+cultureInfo.NumberFormat.NumberDecimalSeparator = "."; 
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -11,6 +16,7 @@ builder.Services.AddPersistenceLayer(builder.Configuration);
 builder.Services.AddSharedLayer(builder.Configuration);
 builder.Services.AddApplicationLayer();
 builder.Services.AddIdentityLayerIocForWebApp(builder.Configuration);
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 
 var app = builder.Build();

@@ -14,7 +14,10 @@ namespace BankingApp.Core.Application.Mappings.EntitiesAndDtos
     {
         public LoanEntityMappingProfile()
         {
-            CreateMap<Loan, LoanDto>();
+            CreateMap<Loan, LoanDto>()
+                .ForMember(r => r.TotalInstallmentsCount, opt => opt.MapFrom(src => src.Installments.Count()))
+           .ForMember(r => r.PaidInstallmentsCount, opt => opt.MapFrom(src => src.Installments.Where(r => r.IsPaid).Count()));
+
         }
     }
 }

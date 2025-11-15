@@ -1,0 +1,80 @@
+﻿@model CreateTransactionExpressViewModel
+
+@{
+    ViewData["Title"] = "Transacciones Express";
+    Layout = "_LayoutClient";
+}
+
+
+
+<link rel="stylesheet" href="~/css/TransactionStyle.css" />
+
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-primary">
+            <i class="bi bi-lightning-charge-fill me-2"></i> Transacción Express
+        </h2>
+        <p class="text-muted">Realiza una transferencia rápida entre cuentas en segundos.</p>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 p-4">
+        <form asp-area="Client" asp-controller="TransactionExpress" asp-action="Create" method="post" class="needs-validation" novalidate>
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+            <div class="row g-4">
+
+
+
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="Beneficiary" class="form-label fw-semibold">Cuenta destino</label>
+                        <input asp-for="Beneficiary" type="text" class="form-control" placeholder="Ej: 9876543210" />
+                   
+                    </div>
+                </div>
+
+
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="Amount" class="form-label fw-semibold">Monto</label>
+                        <input asp-for="Amount" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                   
+                    </div>
+                </div>
+
+
+
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="Origin" class="form-label fw-semibold">Cuenta origen</label>
+                        <select asp-for="Origin" class="form-select">
+                            <option value="">-- Selecciona una cuenta --</option>
+                            @foreach (var cuenta in ViewBag.Cuentas)
+                            {
+                                <option value="@cuenta">@cuenta</option>
+                            }
+                        </select>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+
+            <div class="d-flex justify-content-end mt-4">
+                <a asp-area="Client" asp-controller="Transaction" asp-action="Index" class="btn btn-outline-secondary me-2">
+                    <i class="bi bi-arrow-left-circle me-1"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-send-fill me-1"></i> Continuar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

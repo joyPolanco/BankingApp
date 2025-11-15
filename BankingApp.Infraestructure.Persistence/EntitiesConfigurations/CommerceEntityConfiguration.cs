@@ -12,8 +12,13 @@ namespace BankingApp.Infraestructure.Persistence.EntitiesConfigurations
             builder.Property(x => x.Name).IsRequired();
             builder.Property(x => x.Description);
             builder.Property(x => x.IsActive).IsRequired();
-            builder.Property(x => x.UserId).IsRequired(false);
             builder.Property(x => x.Logo).IsRequired();
+
+            builder.HasMany(c => c.Users)
+         .WithOne(u => u.Commerce)
+         .HasForeignKey(u => u.CommerceId)
+         .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

@@ -1,0 +1,100 @@
+﻿@model BankingApp.Core.Application.ViewModels.Loan.DetailedLoanViewModel
+
+@{
+    ViewData["Title"] = "Detalles del Préstamo";
+}
+
+<div class="container py-5">
+    <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Detalles del Préstamo</h4>
+            <a asp-action="Index" class="btn btn-light btn-sm fw-semibold">
+                ← Volver
+            </a>
+        </div>
+
+        <div class="card-body bg-light">
+            <div class="mb-4">
+                <h5 class="fw-bold text-secondary">
+                    <i class="bi bi-credit-card me-2"></i>ID del préstamo:
+                </h5>
+                <span class="fs-5 text-dark">@Model.LoadId</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle shadow-sm bg-white rounded-3">
+                    <thead class="table-primary">
+                        <tr>
+                            <th scope="col"># Cuota</th>
+                            <th scope="col">Fecha de Pago</th>
+                            <th scope="col">Valor</th>
+                            <th scope="col">Pagado</th>
+                            <th scope="col">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var installment in Model.Installments)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@installment.Number</td>
+                                <td>@installment.PayDate.ToString("dd/MM/yyyy")</td>
+                                <td>@installment.Value.ToString("C")</td>
+                                <td>
+                                    @if (installment.IsPaid)
+                                    {
+                                        <span class="badge bg-success px-3 py-2">Sí</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary px-3 py-2">No</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (installment.IsDelinquent)
+                                    {
+                                        <span class="badge bg-danger px-3 py-2">En mora</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success px-3 py-2">Al día</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    h4, h5 {
+        letter-spacing: 0.5px;
+    }
+
+    .table thead th {
+        border-bottom: 2px solid #0d6efd;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .btn-light:hover {
+        background-color: #e9ecef;
+    }
+
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+</style>

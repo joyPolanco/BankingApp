@@ -10,7 +10,7 @@ namespace BankingApp.Core.Domain.Entities
 
         public required string Number { get; set; }
 
-        public required  string ClientId { get; set; }    
+        public required  string UserId { get; set; }    
         public Decimal Balance { get; set; }
         public AccountType Type { get; set; }
         public AccountStatus Status { get; set; } = AccountStatus.ACTIVE;

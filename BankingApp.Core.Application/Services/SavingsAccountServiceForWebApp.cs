@@ -9,22 +9,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BankingApp.Core.Application.Services
 {
-    public class SavingsAccountServiceForWebApp : ISavingsAccountServiceForWebApp
+    public class SavingsAccountServiceForWebApp :BaseSavingAccountService, ISavingsAccountServiceForWebApp
     {
         private readonly IAccountRepository _accountRepository;
         private readonly IUserService _userService;
-        private readonly IBankAccountService _bankAccountService;
         private readonly IMapper _mapper;
 
         public SavingsAccountServiceForWebApp(
             IAccountRepository accountRepository,
             IUserService userService,
-            IBankAccountService bankAccountService,
-            IMapper mapper)
+            IMapper mapper):base(accountRepository,mapper)
         {
             _accountRepository = accountRepository;
             _userService = userService;
-            _bankAccountService = bankAccountService;
             _mapper = mapper;
         }
 
@@ -37,7 +34,7 @@ namespace BankingApp.Core.Application.Services
             var activeUserIds = await _userService.GetActiveUserIdsAsync();
 
             // Filtrar solo cuentas de usuarios activos
-            accountsList = accountsList.Where(a => activeUserIds.Contains(a.ClientId)).ToList();
+            accountsList = accountsList.Where(a => activeUserIds.Contains(a.UserId)).ToList();
 
             // Filtrar por cédula si se proporciona
             if (!string.IsNullOrEmpty(cedula))
@@ -46,7 +43,7 @@ namespace BankingApp.Core.Application.Services
                 var user = await _userService.GetByDocumentId(cedula);
                 if (user != null)
                 {
-                    accountsList = accountsList.Where(a => a.ClientId == user.Id).ToList();
+                    accountsList = accountsList.Where(a => a.UserId == user.Id).ToList();
                 }
                 else
                 {
@@ -103,7 +100,7 @@ namespace BankingApp.Core.Application.Services
         public async Task<List<AccountDto>> GetAccountsByClientIdAsync(string clientId)
         {
             var accounts = await _accountRepository.GetAllList();
-            var clientAccounts = accounts?.Where(a => a.ClientId == clientId).ToList() ?? new List<Account>();
+            var clientAccounts = accounts?.Where(a => a.UserId == clientId).ToList() ?? new List<Account>();
             return _mapper.Map<List<AccountDto>>(clientAccounts);
         }
 
@@ -111,7 +108,7 @@ namespace BankingApp.Core.Application.Services
         {
             var accounts = await _accountRepository.GetAllList();
             var primaryAccount = accounts?.FirstOrDefault(a => 
-                a.ClientId == clientId && 
+                a.UserId == clientId && 
                 a.Type == AccountType.PRIMARY &&
                 a.Status == AccountStatus.ACTIVE);
             
@@ -121,7 +118,7 @@ namespace BankingApp.Core.Application.Services
         public async Task<AccountDto> CreateSecondaryAccountAsync(AccountDto accountDto, string adminId)
         {
             // Generar número de cuenta único
-            var accountNumber = await _bankAccountService.GenerateAccountNumber();
+            var accountNumber = await GenerateAccountNumber();
             
             var account = _mapper.Map<Account>(accountDto);
             account.Number = accountNumber;
@@ -145,7 +142,7 @@ namespace BankingApp.Core.Application.Services
             // Si tiene balance, transferir a cuenta principal
             if (account.Balance > 0)
             {
-                var primaryAccount = await GetPrimaryAccountByClientIdAsync(account.ClientId);
+                var primaryAccount = await GetPrimaryAccountByClientIdAsync(account.UserId);
                 if (primaryAccount != null)
                 {
                     // Transferir fondos

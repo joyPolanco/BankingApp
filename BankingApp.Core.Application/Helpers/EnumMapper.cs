@@ -59,5 +59,10 @@ namespace BankingApp.Core.Application.Helpers
 
             return Enumerable.Empty<string>();
         }
+
+        public static IEnumerable<(string Alias, TEnum Value)> GetAliasEnumPairs()
+        {
+            return _reverseAliases.Select(pair => (pair.Value.First(), pair.Key));
+        }
     }
 }

@@ -18,10 +18,10 @@ namespace BankingApp.Core.Application.Mappings.EntitiesAndDtos
 
             CreateMap<CreateCommerceDto, CommerceDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => 0))
+                .ForMember(x => x.IsActive, opt => opt.MapFrom(src => true))
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
-            CreateMap<EditCommerceDto, CommerceDto>()
-            .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+            CreateMap<EditCommerceDto, CommerceDto>();
 
 
         }

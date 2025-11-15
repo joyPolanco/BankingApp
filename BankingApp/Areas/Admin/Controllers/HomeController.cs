@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using BankingApp.Core.Application.Interfaces;
+using BankingApp.Core.Application.Services;
+using BankingApp.Core.Application.ViewModels.Dashboards;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankingApp.Areas.Admin.Controllers
@@ -8,9 +11,20 @@ namespace BankingApp.Areas.Admin.Controllers
     [Authorize(Roles = "ADMIN")]
     public class HomeController : Controller
     {
-        public ActionResult Index()
+        private readonly IDashboardsStatsService _dashboardsStatsService;
+        private IMapper _mapper;
+
+        public HomeController(IDashboardsStatsService dashboardsStatsService, IMapper mapper)
         {
-            return View();
+            _dashboardsStatsService = dashboardsStatsService;
+            _mapper = mapper;
+        }
+        public async Task<ActionResult >Index()
+        {
+
+            var dto = await _dashboardsStatsService.GetAdminStats();
+            var vm = _mapper.Map<AdminDashboardViewModel>(dto);
+            return View(vm);
         }
 
         public ActionResult Details(int id)

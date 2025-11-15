@@ -3,7 +3,7 @@ using BankingApp.Core.Application.ViewModels.SavingsAccount;
 
 namespace BankingApp.Core.Application.Interfaces
 {
-    public interface ISavingsAccountServiceForWebApp
+    public interface ISavingsAccountServiceForWebApp: IBaseSavingAccountService
     {
         Task<List<AccountDto>> GetAllAccountsAsync(int page, int pageSize, string? cedula = null, string? estado = null, string? tipo = null);
         Task<AccountDto?> GetAccountByIdAsync(int id);

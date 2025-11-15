@@ -36,5 +36,6 @@ namespace BankingApp.Core.Domain.Entities
 
        public ICollection<Installment> ?Installments { get; set; }
         public DateTime UpdatedAt { get; set; }
+
     }
 }

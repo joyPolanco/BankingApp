@@ -1,0 +1,79 @@
+﻿@{
+    ViewData["Title"] = "Transacciones";
+    Layout = "_LayoutClient";
+}
+
+<link rel="stylesheet" href="~/css/TransactionStyle.css" />
+
+
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-primary mb-3">Centro de Transacciones</h2>
+        <p class="text-muted fs-5">Selecciona el tipo de transacción que deseas realizar</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-5 col-lg-3">
+            <a asp-area="Client" asp-controller="TransactionExpress" asp-action="Create" class="text-decoration-none">
+                <div class="card card-option shadow-sm border-0 text-center h-100 p-4">
+                    <div class="card-body">
+                        <i class="bi bi-lightning-charge-fill icon-option"></i>
+                        <h5 class="fw-bold mt-3">Transacciones Express</h5>
+                        <p class="text-muted small">Realiza transferencias rápidas entre cuentas.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+       
+
+        <div class="col-md-5 col-lg-3">
+            <a asp-area="Client" asp-controller="TransactionToCreditCard" asp-action="Create" class="text-decoration-none">
+                <div class="card card-option shadow-sm border-0 text-center h-100 p-4">
+                    <div class="card-body">
+                        <i class="bi bi-credit-card-2-front-fill icon-option"></i>
+                        <h5 class="fw-bold mt-3">Transacciones a Tarjeta de Crédito</h5>
+                        <p class="text-muted small">Consulta y paga tus tarjetas fácilmente.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+      
+
+
+        <div class="col-md-5 col-lg-3">
+            <a asp-area="Client" asp-controller="TransactionToLoan" asp-action="Create" class="text-decoration-none">
+                <div class="card card-option shadow-sm border-0 text-center h-100 p-4">
+                    <div class="card-body">
+                        <i class="bi bi-cash-coin icon-option"></i>
+                        <h5 class="fw-bold mt-3">Transacciones a Préstamos</h5>
+                        <p class="text-muted small">Gestiona tus préstamos y pagos cómodamente.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+      
+        <div class="col-md-5 col-lg-3">
+            <a asp-area="Client" asp-controller="TransactionToBeneficiary" asp-action="Create" class="text-decoration-none">
+                <div class="card card-option shadow-sm border-0 text-center h-100 p-4">
+                    <div class="card-body">
+                        <i class="bi bi-people-fill icon-option"></i>
+                        <h5 class="fw-bold mt-3">Transacciones a Beneficiarios</h5>
+                        <p class="text-muted small">Administra tus cuentas registradas para transferencias.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.card-option').forEach(card => {
+            card.addEventListener('mouseenter', () => card.classList.add('active'));
+            card.addEventListener('mouseleave', () => card.classList.remove('active'));
+        });
+    </script>
+}
