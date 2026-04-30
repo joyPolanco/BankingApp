@@ -1,12 +1,18 @@
 
-
 # Sistema de Banca en Línea
 
 ## Descripción
 
-Aplicación web desarrollada en **ASP.NET Core 8** que permite la gestión integral de productos financieros: cuentas de ahorro, préstamos, tarjetas de crédito, transferencias y pagos. Incluye control de acceso basado en roles: **Administrador, Cajero y Cliente**.
+Aplicación web desarrollada en **ASP.NET Core 8** para la gestión integral de productos financieros: cuentas de ahorro, préstamos, tarjetas de crédito, transferencias y pagos.
 
-La solución está dividida en:
+El sistema incorpora control de acceso basado en roles:
+
+* Administrador
+* Cajero
+* Cliente
+* Comercio (en la API)
+
+### Estructura de la solución
 
 * **Web App (MVC):** interfaz de usuario
 * **Web API:** servicios backend y procesador de pagos
@@ -21,13 +27,13 @@ La solución está dividida en:
 * **Autenticación:**
 
   * Web App: Cookies
-  * API: JWT
-* **Usuarios:** ASP.NET Identity
+  * API: JWT Bearer Token
+* **Gestión de usuarios:** ASP.NET Core Identity
 * **Mapeo:** AutoMapper
 * **Base de datos:** SQL Server
-* **Frontend:** Bootstrap 5 + CSS
+* **Frontend:** Bootstrap 5 + CSS personalizado
 * **Documentación API:** Swagger
-* **Tareas programadas:** Azure Functions
+* **Automatización:** Azure Functions
 
 ---
 
@@ -36,33 +42,35 @@ La solución está dividida en:
 ```
 /src
 ├── Domain          → Entidades y contratos
-├── Application     → Servicios y lógica de negocio
-├── Infrastructure  → Acceso a datos e implementación
+├── Application     → Lógica de negocio y servicios
+├── Infrastructure  → Acceso a datos
 ├── Presentation    → WebApp (MVC) y WebAPI
-└── AzureFunctions  → Tareas programadas
+└── AzureFunctions  → Procesos automatizados
 ```
 
 ---
 
 ## Funcionalidades Principales
 
-### Usuarios
+### Gestión de Usuarios
 
-* Registro, autenticación y autorización por roles
-* Activación/desactivación de cuentas
+* Registro y autenticación
+* Autorización por roles
+* Activación e inactivación de cuentas
 
 ### Cuentas de Ahorro
 
 * Cuenta principal obligatoria
-* Cuentas secundarias transferibles
+* Creación de cuentas secundarias
+* Transferencias y movimientos
 * Historial de transacciones
 
 ### Préstamos
 
 * Método francés (cuotas fijas)
 * Un préstamo activo por cliente
-* Cálculo automático de cuotas
-* Control de mora automatizado
+* Generación automática de amortización
+* Control automático de mora
 
 ### Tarjetas de Crédito
 
@@ -76,182 +84,215 @@ La solución está dividida en:
 * Pagos de préstamos y tarjetas
 * Avances de efectivo
 
-### Procesador de Pagos
+### Procesador de Pagos (Hermes Pay)
 
-* Validación completa de tarjetas
-* Registro de transacciones
+* Validación de tarjetas
+* Registro de consumos
 * Notificaciones por correo
 
 ---
 
-API - Funcionalidades
-Seguridad
+## API - Seguridad
 
-El sistema implementa autenticación y autorización mediante JWT (JSON Web Token).
+El sistema implementa autenticación y autorización mediante **JWT**.
 
-Roles definidos:
-Administrador
-Comercio
-Reglas:
-Todos los endpoints (excepto login) requieren JWT
-Usuarios no autenticados → 401 Unauthorized
-Usuarios sin permisos → 403 Forbidden
-Uso de [Authorize] con roles
+### Reglas generales
 
-Encabezado requerido:
+* Todos los endpoints (excepto login) requieren autenticación
+* Usuario no autenticado → **401 Unauthorized**
+* Usuario sin permisos → **403 Forbidden**
+* Uso de `[Authorize(Roles = "...")]`
 
+### Encabezado requerido
+
+```
 Authorization: Bearer {token}
-Módulo: Account
-Endpoints
-Login
-POST /account/login
+```
 
-Permite autenticarse y obtener el token JWT.
+### Roles en API
 
-Respuestas:
+* Administrador
+* Comercio
 
-200 → Token generado
-400 → Datos inválidos
-401 → Credenciales incorrectas
-Confirmar cuenta
-POST /account/confirm
+---
 
-Activa un usuario mediante token enviado por correo.
+## API - Módulos y Endpoints
 
-204 → Usuario activado
-400 → Token inválido
-401 → JWT inválido
-Obtener token de reseteo
-POST /account/get-reset-token
+### 1. Account
 
-Genera token para cambio de contraseña.
+**POST /account/login**
 
-Inactiva usuario temporalmente
-Envía token por correo
-Resetear contraseña
-POST /account/reset-password
+* Autenticación y generación de JWT
 
-Actualiza contraseña usando token.
+**POST /account/confirm**
 
-204 → Contraseña actualizada
-400 → Error de validación
-401 → No autorizado
-Módulo: Usuarios (Admin)
+* Activación de usuario mediante token
+
+**POST /account/get-reset-token**
+
+* Generación de token para reset de contraseña
+* Inactiva usuario temporalmente
+* Envía token por correo
+
+**POST /account/reset-password**
+
+* Cambio de contraseña mediante token
+
+---
+
+### 2. Gestión de Usuarios (Administrador)
+
 /api/users
-Endpoints
-GET /api/users → Listado paginado
-GET /api/users/commerce → Usuarios tipo comercio
-POST /api/users → Crear usuario
-POST /api/users/commerce/{id} → Crear usuario comercio
-PUT /api/users/{id} → Actualizar
-PATCH /api/users/{id}/status → Activar/Inactivar
-GET /api/users/{id} → Detalle
 
-Reglas clave:
+Endpoints:
 
-Usuario y correo únicos
-Clientes crean cuenta automáticamente
-Comercio solo puede tener un usuario
-Módulo: Préstamos (Admin)
+* GET /api/users → Listado paginado
+* GET /api/users/commerce → Usuarios tipo comercio
+* POST /api/users → Crear usuario
+* POST /api/users/commerce/{id} → Crear usuario comercio
+* PUT /api/users/{id} → Actualizar usuario
+* PATCH /api/users/{id}/status → Activar/Inactivar
+* GET /api/users/{id} → Detalle
+
+**Reglas:**
+
+* Usuario y correo únicos
+* Clientes generan cuenta automáticamente
+* Comercios solo pueden tener un usuario
+
+---
+
+### 3. Préstamos (Administrador)
+
 /api/loan
-Endpoints
-GET /api/loan → Listado
-POST /api/loan → Crear préstamo
-GET /api/loan/{id} → Detalle + amortización
-PATCH /api/loan/{id}/rate → Editar tasa
 
-Reglas:
+Endpoints:
 
-Un préstamo activo por cliente
-Evaluación de riesgo
-Genera tabla de amortización
-Acredita monto automáticamente
-Módulo: Tarjetas de Crédito (Admin)
+* GET /api/loan
+* POST /api/loan
+* GET /api/loan/{id}
+* PATCH /api/loan/{id}/rate
+
+**Reglas:**
+
+* Un préstamo activo por cliente
+* Evaluación de riesgo
+* Generación automática de cuotas
+* Acreditación automática del monto
+
+---
+
+### 4. Tarjetas de Crédito (Administrador)
+
 /api/credit-card
-Endpoints
-GET /api/credit-card → Listado
-POST /api/credit-card → Crear
-GET /api/credit-card/{id} → Detalle
-PATCH /api/credit-card/{id}/limit → Editar límite
-PATCH /api/credit-card/{id}/cancel → Cancelar
 
-Reglas:
+Endpoints:
 
-No cancelar con deuda
-Límite ≥ deuda actual
-Módulo: Cuentas de Ahorro (Admin)
+* GET /api/credit-card
+* POST /api/credit-card
+* GET /api/credit-card/{id}
+* PATCH /api/credit-card/{id}/limit
+* PATCH /api/credit-card/{id}/cancel
+
+**Reglas:**
+
+* No cancelar con deuda pendiente
+* Límite no menor a la deuda actual
+
+---
+
+### 5. Cuentas de Ahorro (Administrador)
+
 /api/savings-account
-Endpoints
-GET /api/savings-account → Listado
-POST /api/savings-account → Crear secundaria
-GET /api/savings-account/{accountNumber}/transactions → Movimientos
-Módulo: Comercios (Admin)
+
+Endpoints:
+
+* GET /api/savings-account
+* POST /api/savings-account
+* GET /api/savings-account/{accountNumber}/transactions
+
+---
+
+### 6. Comercios (Administrador)
+
 /api/commerce
-Endpoints
-GET /api/commerce → Listado
-GET /api/commerce/{id} → Detalle
-POST /api/commerce → Crear
-PUT /api/commerce/{id} → Actualizar
-PATCH /api/commerce/{id} → Estado
 
-Regla clave:
+Endpoints:
 
-Desactivar comercio → desactiva usuarios asociados
-Módulo: Pagos (Hermes Pay)
-/pay
-Endpoints
-Obtener transacciones
-GET /pay/get-transactions/{commerceId}
-Comercio → ID desde token
-Admin → ID por parámetro
-Procesar pago
-POST /pay/process-payment/{commerceId}
+* GET /api/commerce
+* GET /api/commerce/{id}
+* POST /api/commerce
+* PUT /api/commerce/{id}
+* PATCH /api/commerce/{id}
 
-Validaciones:
+**Regla clave:**
 
-Tarjeta válida (número, fecha, CVC)
-Comercio existente
-Límite disponible suficiente
+* Desactivar comercio desactiva sus usuarios asociados
 
-Acciones:
+---
 
-Acredita monto al comercio
-Registra consumo
-Envía notificación por correo
-Códigos de Estado
-Código	Significado
-200	OK
-201	Creado
-204	Sin contenido
-400	Error de validación
-401	No autenticado
-403	Sin permisos
-404	No encontrado
-409	Conflicto
+### 7. Pagos - Hermes Pay
+
+/payload
+
+**GET /pay/get-transactions/{commerceId}**
+
+* Comercio: obtiene ID desde JWT
+* Admin: envía ID por parámetro
+
+**POST /pay/process-payment/{commerceId}**
+
+**Validaciones:**
+
+* Tarjeta válida (número, fecha, CVC)
+* Comercio existente
+* Límite suficiente
+
+**Acciones:**
+
+* Acredita monto al comercio
+* Registra consumo
+* Envía notificación por correo
+
+---
+
+## Códigos de Estado
+
+| Código | Significado         |
+| ------ | ------------------- |
+| 200    | OK                  |
+| 201    | Creado              |
+| 204    | Sin contenido       |
+| 400    | Error de validación |
+| 401    | No autenticado      |
+| 403    | Sin permisos        |
+| 404    | No encontrado       |
+| 409    | Conflicto           |
+
 ---
 
 ## Seguridad
 
-* Autenticación con JWT
-* Autorización por roles
+* Autenticación mediante JWT
+* Autorización basada en roles
 * Validación de acceso (401 / 403)
 * Cifrado de datos sensibles
-* Transacciones atómicas en operaciones financieras
+* Uso de transacciones atómicas
 
 ---
 
 ## Automatización
 
-**Azure Function:**
+### Azure Function
 
-* Ejecuta diariamente (1:00 AM)
+* Ejecución diaria (1:00 AM)
 * Marca cuotas vencidas automáticamente
 
 ---
 
 ## Modelo de Datos (Resumen)
 
-Principales entidades:
+### Entidades principales
 
 * Usuario
 * Cuenta de ahorro
@@ -261,7 +302,7 @@ Principales entidades:
 * Transacciones
 * Comercios
 
-Relaciones:
+### Relaciones
 
 * Usuario → múltiples cuentas, préstamos y tarjetas
 * Cuenta → múltiples transacciones
@@ -277,6 +318,7 @@ Relaciones:
 * Pagos no exceden deuda
 * Evaluación de riesgo basada en deuda promedio
 
+---
 
 ## Configuración
 
@@ -284,7 +326,7 @@ Variables principales:
 
 * Cadena de conexión (SQL Server)
 * Clave JWT
-* Configuración de correo SMTP
+* Configuración SMTP
 * Azure Storage (Functions)
 
 ---
@@ -296,12 +338,10 @@ Variables principales:
 
 ---
 
-## Autor
+## Autores
 
-Johaly Concepción Polanco
-Homer Osiris Portés Duran
-Kelvin Diaz Ramirez
-
----
+* Johaly Concepción Polanco
+* Homer Osiris Portés Duran
+* Kelvin Diaz Ramirez
 
 
